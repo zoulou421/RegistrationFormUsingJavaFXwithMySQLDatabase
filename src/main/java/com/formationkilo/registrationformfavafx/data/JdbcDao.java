@@ -1,9 +1,6 @@
-package com.formationkilo.registrationformfavafx.registration;
+package com.formationkilo.registrationformfavafx.data;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class JdbcDao {
     // Replace below database url, username and password with your actual database credentials
@@ -11,6 +8,10 @@ public class JdbcDao {
     private static final String DATABASE_USERNAME = "root";
     private static final String DATABASE_PASSWORD = "";
     private static final String INSERT_QUERY = "INSERT INTO registration (full_name, email_id, password) VALUES (?, ?, ?)";
+
+    //For login:
+    private static final String SELECT_QUERY = "SELECT * FROM registration WHERE email_id = ? and password = ?";
+
     public void insertRecord(String fullName, String emailId, String password) throws SQLException {
 
         // Step 1: Establishing a Connection and
@@ -47,6 +48,34 @@ public class JdbcDao {
             }
         }
     }
+
+    public boolean validate(String emailId, String password) throws SQLException {
+
+        // Step 1: Establishing a Connection and
+        // try-with-resource statement will auto close the connection.
+        try (Connection connection = DriverManager
+                .getConnection(DATABASE_URL, DATABASE_USERNAME, DATABASE_PASSWORD);
+
+             // Step 2:Create a statement using connection object
+             PreparedStatement preparedStatement = connection.prepareStatement(SELECT_QUERY)) {
+            preparedStatement.setString(1, emailId);
+            preparedStatement.setString(2, password);
+
+            System.out.println(preparedStatement);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return true;
+            }
+
+
+        } catch (SQLException e) {
+            // print SQL exception information
+            printSQLException(e);
+        }
+        return false;
+    }
+
 
 
 }

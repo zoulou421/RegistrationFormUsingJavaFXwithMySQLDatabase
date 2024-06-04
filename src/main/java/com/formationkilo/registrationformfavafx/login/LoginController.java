@@ -1,4 +1,4 @@
-package com.formationkilo.registrationformfavafx.registration;
+package com.formationkilo.registrationformfavafx.login;
 
 import com.formationkilo.registrationformfavafx.data.JdbcDao;
 import javafx.event.ActionEvent;
@@ -11,9 +11,7 @@ import javafx.stage.Window;
 
 import java.sql.SQLException;
 
-public class RegisterController {
-    @FXML
-    private TextField fullNameField;
+public class LoginController {
 
     @FXML
     private TextField emailIdField;
@@ -25,18 +23,12 @@ public class RegisterController {
     private Button submitButton;
 
     @FXML
-    public void register(ActionEvent event) throws SQLException {
+    public void login(ActionEvent event) throws SQLException {
 
         Window owner = submitButton.getScene().getWindow();
 
-        System.out.println(fullNameField.getText());
         System.out.println(emailIdField.getText());
         System.out.println(passwordField.getText());
-        if (fullNameField.getText().isEmpty()) {
-            showAlert(Alert.AlertType.ERROR, owner, "Form Error!",
-                    "Please enter your name");
-            return;
-        }
 
         if (emailIdField.getText().isEmpty()) {
             showAlert(Alert.AlertType.ERROR, owner, "Form Error!",
@@ -49,15 +41,25 @@ public class RegisterController {
             return;
         }
 
-        String fullName = fullNameField.getText();
         String emailId = emailIdField.getText();
         String password = passwordField.getText();
 
         JdbcDao jdbcDao = new JdbcDao();
-        jdbcDao.insertRecord(fullName, emailId, password);
+        boolean flag = jdbcDao.validate(emailId, password);
 
-        showAlert(Alert.AlertType.CONFIRMATION, owner, "Registration Successful!",
-                "Welcome " + fullNameField.getText());
+        if (!flag) {
+            infoBox("Please enter correct Email and Password", null, "Failed");
+        } else {
+            infoBox("Login Successful!", null, "Failed");
+        }
+    }
+
+    public static void infoBox(String infoMessage, String headerText, String title) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setContentText(infoMessage);
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        alert.showAndWait();
     }
 
     private static void showAlert(Alert.AlertType alertType, Window owner, String title, String message) {
